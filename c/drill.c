@@ -3,7 +3,7 @@
 #include <time.h>
 
 int main(void){
-
+  
   int q1;
   int q2;
   int shuf;
@@ -13,7 +13,6 @@ int main(void){
   int end;
   int t1;
   int t2;
- 
   
   printf("希望する問題数を入力:");
   scanf("%d", &end);
@@ -26,21 +25,25 @@ int main(void){
     q2 = rand()*2%10;
     shuf = rand()%3;
 
-    printf("\n残り問題数:%d\n\n", end-No);
+    if(q2 <= 0){
+      q2 = rand()%10;
+    }
+
+    printf("\n*残り問題数:%d*\n", end-No);
 
     if(shuf == 0){
       printf("%d + %d = ", q1, q2);
       col = q1+q2;
       scanf("%d", &ans);
       if(ans != col){
-	while(ans != col){
-	  printf("\n\nやり直し!\n");
-	  scanf("%d", &ans);
-	}
+        while(ans != col){
+          printf("やり直し!\n");
+          scanf("%d", &ans);
+        }
       }
       else if(ans == col){
-	printf("\n\n正解!!\n");
-	No = No+1;
+        printf("正解!!\n");
+        No = No+1;
       }
 	}
     else if(shuf == 1){
@@ -48,14 +51,14 @@ int main(void){
       col = q1-q2;
       scanf("%d", &ans);
       if(ans != col){
-	while(ans != col){
-	  printf("\n\nやり直し!\n");
-	  scanf("%d", &ans);
-	}
+        while(ans != col){
+          printf("やり直し!\n");
+          scanf("%d", &ans);
+        }
       }
       else if(ans == col){
-	printf("\n\n正解!!\n");
-	No = No+1;
+        printf("正解!!\n");
+        No = No+1;
       }
 	}
     else if(shuf == 2){
@@ -63,19 +66,19 @@ int main(void){
       col = q1*q2;
       scanf("%d", &ans);
       if(ans != col){
-	while(ans != col){
-	  printf("\n\nやり直し!\n");
-	  scanf("%d", &ans);
-	  }
+        while(ans != col){
+          printf("やり直し!\n");
+          scanf("%d", &ans);
+        }
       }
       else if(ans == col){
-	printf("\n\n正解!!\n");
-	No = No+1;
+        printf("正解!!\n");
+        No = No+1;
       }
     }
-}
+  }
   t2 = time(NULL);
-  printf("\n\nかかった時間:%d秒\n", t2-t1);
+  printf("\n~~~~~~~~~~~~~~~~~~~~\nかかった時間:%d秒\n", t2-t1);
   printf("1問あたりの平均:%d秒\n", (t2-t1)/end);
   
   return 0;
