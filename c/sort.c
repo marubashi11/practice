@@ -5,12 +5,14 @@ int main(void){
   char word[30];
   char hold;
   int i;
-  int rep;
   
   printf("\n並べ替えたい文字列を入力:");
-  scanf("%s", word);
+  for(i = 0 ; i < 30 && word[i-1] != '\n' ; i++){
+    word[i] = getchar();
+  }
+  if(word[i-1] = '\n') word[i-1] = '\0';
   printf("\n入力した文字列は\"%s\"\n", word);
-  for(rep = 0 ; rep < 100 ; rep++){
+  for(int rep = 0 ; rep < 30 ; rep++){
     for(i = 0 ; word[i+1] != 0 ; i++){
       if(word[i] > word[i+1]){
         hold = word[i];
