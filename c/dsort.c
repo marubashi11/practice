@@ -18,6 +18,9 @@ int main(void){
   
     for(j = 0 ; j < 30 && word[i][j-1] != '\n' ; j++){
       word[i][j] = getchar();
+      if(65 <= word[i][j] && word[i][j] <= 90){
+        word[i][j] = word[i][j]+32;//大文字を小文字に変換
+      }
     }
     if(word[i][j-1] == '\n') word[i][j-1] = '\0';
   }
