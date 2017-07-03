@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 
 int main(void){
 
@@ -12,8 +11,9 @@ int main(void){
   printf("並べたい単語の数を決定:");
   scanf("%d", &wc);
   getchar();//scanfで拾った\nを処分
+  if(wc >= 100) printf("100個目の単語まで受け付けます。\n");
   
-  for(i = 0 ; i <= wc-1 ; i++){
+  for(i = 0 ; i <= 99 && i <= wc-1 ; i++){
     printf("\n%dつ目の単語を入力:", i+1);
   
     for(j = 0 ; j < 30 && word[i][j-1] != '\n' ; j++){
@@ -25,13 +25,11 @@ int main(void){
     if(word[i][j-1] == '\n') word[i][j-1] = '\0';
   }
   
-  for(int rpt = 0 ; rpt < 100 ; rpt++){//比較入れ替えを99回実行
-    for(i = 0 ; word[i+1][0] != '\0' ; i++){//列を動かす
+  for(int rpt = 0 ; rpt <= 99 ; rpt++){//比較入れ替えを100回実行
+    for(i = 0 ; word[i+1][0] != '\0' ; i++){//列だけを動かす
     
-      for(j = 0 ; word[i][j] != '\0' && word[i+1][j] != '\0' ; j++){//文字を動かす
-        if(word[i][j] < word[i+1][j]){
-          break;//順番通りなので何もしない
-        }
+      for(j = 0 ; word[i][j] != '\0' && word[i+1][j] != '\0' ; j++){//文字だけを動かす
+        if(word[i][j] < word[i+1][j]) break;//順番通りなので何もしない
         else if(word[i][j] > word[i+1][j] || (word[i][j+1] != '\0' && word[i+1][j+1] == '\0')){
           for(int k = 0 ; k <= 29 ; k++){
             hold = word[i][k]; 
