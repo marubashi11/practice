@@ -8,7 +8,7 @@ int main(){
   int i2; int j2;
   int count = 0; //終了まで何手かをカウントする。
   int sw = 1; //1P,2P切り替え用。
-  int p; int jud; //この2つは判定用。
+  int p = 0; int jud = 0; //この2つは判定用。
   std::string mark; //前の手番のマークを記録(x|, o|)。
   std::string board[9][9];
   for(int i = 0; i < 9; i++){ //まずすべてのマスを空白に。
@@ -40,26 +40,34 @@ int main(){
         std::cout << board[i][j];
         /////////////// 石が置かれるごとに判定 ///////////////
         if(board[i][j] == mark){
-          for(int s = 1; s <= 4; s++){ //横チェック。
-            if(board[i + s][j] == mark) p++;
+          if(j <= 4){
+            for(int s = 1; s <= 4; s++){ //横チェック。
+              if(board[i][j + s] == mark) p++;
+            }
+            if(p == 4) jud = 1; //終了を検出したらjud = 1;。
+            p = 0;
           }
-          if(p >= 4) jud = 1; //終了を検出したらjud = 1;。
-          p = 0;
-          for(int v = 1; v <= 4; v++){ //縦チェック。
-            if(board[i][j + v] == mark) p++;
+          if(i <= 4){
+            for(int v = 1; v <= 4; v++){ //縦チェック。
+              if(board[i + v][j] == mark) p++;
+            }
+            if(p == 4) jud = 1;
+            p = 0;
           }
-          if(p >= 4) jud = 1;
-          p = 0;
-          for(int rd = 1; rd <= 4; rd++){ //右斜めチェック。
-            if(board[i + rd][j + rd] == mark) p++;
+          if(i <= 4 && j <= 4){
+            for(int rd = 1; rd <= 4; rd++){ //右斜めチェック。
+              if(board[i + rd][j + rd] == mark) p++;
+            }
+            if(p == 4) jud = 1;
+            p = 0;
           }
-          if(p >= 4) jud = 1;
-          p = 0;
-          for(int ld = 1; ld <= 4; ld++){ //左斜めチェック。
-            if(board[i + ld][j - ld] == mark) p++;
+          if(i <= 4 && j >= 4){
+            for(int ld = 1; ld <= 4; ld++){ //左斜めチェック。
+              if(board[i + ld][j - ld] == mark) p++;
+            }
+            if(p == 4) jud = 1;
+            p = 0;
           }
-          if(p >= 4) jud = 1;
-          p = 0;
         }
         //////////////////////////////////////////////////////
       }
@@ -67,7 +75,7 @@ int main(){
     }
     std::cout << " -------------------\n";
     
-    if(jud == 1){ //終了を宣言。
+    if(jud >= 1){ //終了を宣言。
       std::cout << "<< " << count - 1 << "手で";
       if(mark == "x|"){ std::cout << "1P[x]"; }
       else std::cout << "2P[o]";
