@@ -14,20 +14,21 @@ int main(void){
   if(wc >= 100) printf("100個目の単語まで受け付けます。\n");
   
   for(i = 0 ; i <= 99 && i <= wc-1 ; i++){
-    printf("\n%dつ目の単語を入力:", i+1);
+    printf("\n%d個目の単語を入力:", i+1);
   
-    for(j = 0 ; j < 30 && word[i][j-1] != '\n' ; j++){
+    for(j = 0 ; j <= 29 && word[i][j-1] != '\n' ; j++){
       word[i][j] = getchar();
       if(65 <= word[i][j] && word[i][j] <= 90){
         word[i][j] = word[i][j]+32;//大文字を小文字に変換
       }
     }
+    
     if(word[i][j-1] == '\n') word[i][j-1] = '\0';
+    if(word[i][0] == '\0') i = i-1;//改行のみならノーカン
   }
   
   for(int rpt = 0 ; rpt <= 99 ; rpt++){//比較入れ替えを100回実行
-    for(i = 0 ; word[i+1][0] != '\0' ; i++){//列だけを動かす
-    
+    for(i = 0 ; word[i+1][0] != '\0' ; i++){//列だけを動かす  
       for(j = 0 ; word[i][j] != '\0' && word[i+1][j] != '\0' ; j++){//文字だけを動かす
         if(word[i][j] < word[i+1][j]) break;//順番通りなので何もしない
         else if(word[i][j] > word[i+1][j] || (word[i][j+1] != '\0' && word[i+1][j+1] == '\0')){
