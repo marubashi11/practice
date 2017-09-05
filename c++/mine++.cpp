@@ -61,9 +61,6 @@ int Field::report(int cell){
   else if(f_state_[cell] == 'x') return 2;
   else return 3;  
 }
-void Field::blow(int m){
-  f_state_[m] = '#';
-}
 int Field::judge(int mine){
   int jud = 0;
   for(int i = 0; i < 81; i++)
@@ -212,7 +209,8 @@ int main(){
     
     if(buff[0] != 482 && under.step_on(buff[0])){
       for(int i = 0; i < 81; i++)
-	if(under.step_on(i)) field.blow(i);
+	if(under.step_on(i) && field.report(i) != 2)
+	  field.set_field(i, '#');
       field.out_field(0);
       host.announce_result(2);
       break;
