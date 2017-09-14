@@ -59,7 +59,7 @@ int Field::report(int cell){
   else if(f_state_[cell] == '\"') return 0;
   else if(f_state_[cell] == '0') return 1;
   else if(f_state_[cell] == 'x') return 2;
-  else return 3;  
+  else return 3;
 }
 int Field::judge(int mine){
   int jud = 0;
@@ -206,22 +206,30 @@ int main(){
   while(true){
     buff[1] = 0;
     buff[0] = host.ask_cell(0);
-    
+
     if(buff[0] != 482 && under.step_on(buff[0])){
-      for(int i = 0; i < 81; i++)
-	if(under.step_on(i) && field.report(i) != 2)
-	  field.set_field(i, '#');
+      for(int i = 0; i < 81; i++){
+        if(under.step_on(i))
+          switch(field.report(i)){
+          case 2:
+            field.set_field(i, '-');
+            break;
+          default:
+            field.set_field(i, '#');
+            break;
+          }
+      }
       field.out_field(0);
       host.announce_result(2);
       break;
     }
-    
+
     switch(buff[0]){
     case 482: //Flag mode
       while(buff[1] != 482){ //もう一度"ff"が入力されたら終了。
 	buff[1] = host.ask_cell(1);
 	switch(field.report(buff[1])){
-	case 0:    
+	case 0:
 	  field.set_field(buff[1], 'x');
 	  field.out_field(total_mine);
 	  break;
