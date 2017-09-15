@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#define FLAG 482
 
 /*
   今度はfieldを一次元配列で考える。
@@ -24,7 +25,6 @@ public:
   void out_field(int); //fieldを表示。引数はmine数。
   void set_field(int, char); //f_state_[int] = char;を実行。
   int report(int); //指定cellが… 草: 0、'0': 1、'x': 2、他: 3。
-  void blow(int); //指定cellを爆破させる。
   int judge(int); //勝利判定。終了なら1を返す。引数はmine数。
 private:
   char f_state_[81];
@@ -55,7 +55,7 @@ void Field::set_field(int cell, char info){
   f_state_[cell] = info;
 }
 int Field::report(int cell){
-  if(cell == 482) return 482;
+  if(cell == FLAG) return FLAG;
   else if(f_state_[cell] == '\"') return 0;
   else if(f_state_[cell] == '0') return 1;
   else if(f_state_[cell] == 'x') return 2;
@@ -172,7 +172,7 @@ int Host::ask_cell(int mode){
     cell = ((get_i - 48) - 1) * 9 + ((get_j - 96) - 1);
     if((cell >= 0 && cell <= 80) || cell == 482)
       return cell;
-    std::cout << "[!]You entered incorrect number.";
+    std::cout << "[!]You entered incorrect number." << std::endl;
   }
 }
 bool Host::announce_result(int r){
@@ -200,19 +200,19 @@ int main(){
   field.out_field(0);
   int total_mine = host.ask_mine_number();
   Underground under(total_mine);
-  Underground* address_u =&under; //メンバ関数の参照に必要。
-  Field* address_f =&field; //メンバ関数の参照に必要。
+  Underground* address_u = &under; //メンバ関数の参照に必要。
+  Field* address_f = &field; //メンバ関数の参照に必要。
 
   while(true){
     buff[1] = 0;
     buff[0] = host.ask_cell(0);
 
-    if(buff[0] != 482 && under.step_on(buff[0])){
+    if(buff[0] != FLAG && under.step_on(buff[0])){
       for(int i = 0; i < 81; i++){
         if(under.step_on(i))
           switch(field.report(i)){
           case 2:
-            field.set_field(i, '-');
+            field.set_field(i, 'X');
             break;
           default:
             field.set_field(i, '#');
@@ -225,8 +225,8 @@ int main(){
     }
 
     switch(buff[0]){
-    case 482: //Flag mode
-      while(buff[1] != 482){ //もう一度"ff"が入力されたら終了。
+    case FLAG: //Flag mode
+      while(buff[1] != FLAG){ //もう一度"ff"が入力されたら終了。
 	buff[1] = host.ask_cell(1);
 	switch(field.report(buff[1])){
 	case 0:
@@ -237,7 +237,7 @@ int main(){
 	  field.set_field(buff[1], '\"');
 	  field.out_field(total_mine);
 	  break;
-	case 482:
+	case FLAG:
 	  std::cout << "::    end    ::" << std::endl;
 	  break;
 	default:
