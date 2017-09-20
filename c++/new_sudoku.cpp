@@ -7,45 +7,70 @@
 
 class Board{
 public:
-  Board(int); //answer_, board_, save_を作成、cursor_を初期化。
+  Board(int); //board_, save_を作成、cursor_を初期化。
+  void make_answer(); //answer_を作成。
   void out_board(bool); //盤面を出力。
   void set_number(int, char); //board_に数字をセットする。
   void set_cursor(int); //cursor_を指定の座標に移動させる。
   bool answer_match(); //答え合わせ。
   bool check_num(int, int); //縦、横、ブロック内に同じ数字がないかチェック。
   void make_memo(int); //自動で指定座標のmemoを作成する。
-  void save_board();
-  void load_board();
+  void save_board(); //盤面の一時保存。
+  void load_board(); //一時保存した盤面のロード。
 private:
   char answer_[SIZE][SIZE];
   char board_[SIZE][SIZE];
+  char constant_[SIZE][SIZE]; //最初の数字を変更不可にするため。
   char save_[SIZE][SIZE];
   char cursor_[SIZE][SIZE];
   char memo_[SIZE];
 };
 Board::Board(int hint){
+  std::random_device rnd;
+  int rm;
+
+  make_answer();
+  for(int i = 0; i < 9; i++)
+    for(int j = 0; j < 9; j++)
+      board_[i][j] = '.';
+  for(int i = 0; i < 9; i++)
+    for(int j = 0; j < 9; j++)
+      constant_[i][j] = '\0';
+  for(int h = 0; h < hint; h++){
+    rm = rnd() % 81;
+    if(board_[rm / 9][rm % 9] == '.'){
+      board_[rm / 9][rm % 9] = answer_[rm / 9][rm % 9];
+      constant_[rm / 9][rm % 9] = answer_[rm / 9][rm % 9];
+    }
+    else h--;
+  }
+  save_board();
+  set_cursor(0);
+}
+void Board::make_answer(){
   int r, x, y;
   char buff;
   std::random_device rnd;
   char sample_1[81] = { '1', '4', '7', '2', '5', '8', '3', '6', '9', '2', '5', '8', '3', '6', '9', '4', '7', '1', '3', '6', '9', '4', '7', '1', '5', '8', '2', '4', '7', '1', '5', '8', '2', '6', '9', '3', '5', '8', '2', '6', '9', '3', '7', '1', '4', '6', '9', '3', '7', '1', '4', '8', '2', '5', '7', '1', '4', '8', '2', '5', '9', '3', '6', '8', '2', '5', '9', '3', '6', '1', '4', '7', '9', '3', '6', '1', '4', '7', '2', '5', '8' };
   char sample_2[81] = { '8', '9', '7', '6', '3', '5', '4', '1', '2', '1', '6', '3', '2', '4', '7', '5', '8', '9', '2', '4', '5', '8', '1', '9', '6', '3', '7', '7', '8', '6', '9', '5', '3', '2', '4', '1', '3', '5', '4', '1', '8', '2', '9', '7', '6', '9', '1', '2', '7', '6', '4', '8', '5', '3', '5', '2', '8', '3', '7', '6', '1', '9', '4', '6', '7', '1', '4', '9', '8', '3', '2', '5', '4', '3', '9', '5', '2', '1', '7', '6', '8' };
+  char sample_3[81] = { '7', '4', '5', '9', '8', '3', '6', '2', '1', '9', '8', '1', '2', '5', '6', '3', '4', '7', '2', '6', '3', '1', '4', '7', '5', '9', '8', '1', '2', '6', '5', '7', '4', '9', '8', '3', '4', '5', '7', '3', '9', '8', '1', '6', '2', '8', '3', '9', '6', '2', '1', '7', '5', '4', '5', '7', '2', '8', '3', '9', '4', '1', '6', '3', '1', '8', '4', '6', '5', '2', '7', '9', '6', '9', '4', '7', '1', '2', '8', '3', '5' };
+  int s_num = rnd() % 3;
 
-  switch(rnd() % 2){
-  case 0:
-    for(int k = 0; k < 81; k++){
-      int I = k / 9;
-      int J = k % 9;
+  for(int k = 0; k < 81; k++){
+    int I = k / 9;
+    int J = k % 9;
+    switch(s_num){
+    case 0:
       answer_[I][J] = sample_1[k];
-    }
-    break;
-  case 1:
-    for(int k = 0; k < 81; k++){
-      int I = k / 9;
-      int J = k % 9;
+      break;
+    case 1:
       answer_[I][J] = sample_2[k];
+      break;
+    case 2:
+      answer_[I][J] = sample_3[k];
     }
-    break;
   }
+
   for(int sh = 0; sh < 50; sh++){
     x = (rnd() % 3) * 3;
     r = rnd() % 2 + 1;
@@ -77,17 +102,6 @@ Board::Board(int hint){
       }
   }
 
-  for(int i = 0; i < 9; i++)
-    for(int j = 0; j < 9; j++)
-      board_[i][j] = '.';
-  for(int h = 0; h < hint; h++){
-    int rm = rnd() % 81;
-    if(board_[rm / 9][rm % 9] == '.')
-      board_[rm / 9][rm % 9] = answer_[rm / 9][rm % 9];
-    else h--;
-  }
-  save_board();
-  set_cursor(0);
 }
 void Board::out_board(bool m){
   std::cout << std::endl << "  X";
@@ -125,7 +139,9 @@ void Board::out_board(bool m){
 void Board::set_number(int cd, char num){
   int x = cd % SIZE;
   int y = cd / SIZE;
-  if(board_[y][x] == num)
+  if(constant_[y][x] != '\0')
+    std::cout << "[!]その数字は変更できません。" << std::endl;
+  else if(board_[y][x] == num) //既にそこにある数字と同じ数字。
     board_[y][x] = '.';
   else if(!check_num(num - 48, cd))
     std::cout << "[!]そこにその数字は入れられません。" << std::endl;
@@ -151,7 +167,7 @@ void Board::set_cursor(int cd){
 bool Board::answer_match(){
     for(int i = 0; i < 9; i++)
       for(int j = 0; j < 9; j++)
-        if(board_[i][j] != answer_[i][j])
+        if(board_[i][j] == '.')
           return false;
     return true;
 }
@@ -187,11 +203,13 @@ void Board::save_board(){
   for(int i = 0; i < 9; i++)
     for(int j = 0; j < 9; j++)
       save_[i][j] = board_[i][j];
+  std::cout << "盤面を一時保存しました。" << std::endl;
 }
 void Board::load_board(){
   for(int i = 0; i < 9; i++)
     for(int j = 0; j < 9; j++)
       board_[i][j] = save_[i][j];
+  std::cout << "一時保存した盤面を読み込みました。" << std::endl;
 }
 
 class GM{
@@ -227,7 +245,7 @@ int GM::ask_hint(){
 int GM::ask_num(){
   int get, cd;
   while(true){
-    std::cout << "                          X    Y" << std::endl
+    std::cout << "    func                  X    Y" << std::endl
               << "数字[0 or 1~9]または座標[1~9][1~9]を入力: ";
     std::cin >> get;
     if(get == 0)
@@ -258,7 +276,7 @@ char GM::call_function(){
 }
 void GM::congratulate(){
   std::cout << "<< Congratulations!! >>"<< std::endl
-            << "あなたは隠された数字をすべて当てました。"<< std::endl;
+            << "あなたは論理的に数字を埋め尽くしました。"<< std::endl;
 }
 
 int main(){
