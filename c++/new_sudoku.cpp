@@ -1,9 +1,12 @@
 #include <iostream>
+#include <string>
 #include <random>
+
 #define SIZE 9
 #define IDENTIFY 100
-#define FUNCTION 800
-#define INVALID 1000
+#define MEMO 61
+#define SAVE 67
+#define LOAD 60
 
 class Board{
 public:
@@ -25,6 +28,7 @@ private:
   char cursor_[SIZE][SIZE];
   char memo_[SIZE];
 };
+
 Board::Board(int hint){
   std::random_device rnd;
   int rm;
@@ -121,6 +125,12 @@ void Board::out_board(bool m){
       std::cout << cursor_[i][j] << board_[i][j];
       if(j % 3 == 2) std::cout << " |";
     }
+    if(i == 6)
+      std::cout << "   [m]自動メモの表示切替え";
+    if(i == 7)
+      std::cout << "   [s]盤面の一時保存";
+    if(i == 8)
+      std::cout << "   [l]一時保存した盤面の読み込み";
     std::cout << std::endl;
     if(i % 3 == 2){
       std::cout << "  ";
@@ -159,8 +169,11 @@ void Board::set_cursor(int cd){
   if(board_[y][x] != '.'){
     for(int i = 0; i < 9; i++)
       for(int j = 0; j < 9; j++){
-        if(board_[i][j] == board_[y][x] && i * 9 + j != cd)
-          cursor_[i][j] = '{'; //同じ数字を強調。
+        if(board_[i][j] == board_[y][x] && i * 9 + j != cd){
+          if(constant_[i][j] != '\0')
+            cursor_[i][j] = '['; //同じ数字&変更不可を強調。
+          else cursor_[i][j] = '{'; //同じ数字を強調。
+        }
       }
   }
 }
@@ -203,22 +216,22 @@ void Board::save_board(){
   for(int i = 0; i < 9; i++)
     for(int j = 0; j < 9; j++)
       save_[i][j] = board_[i][j];
-  std::cout << "盤面を一時保存しました。" << std::endl;
+  std::cout << "### 盤面を一時保存しました ###" << std::endl;
 }
 void Board::load_board(){
   for(int i = 0; i < 9; i++)
     for(int j = 0; j < 9; j++)
       board_[i][j] = save_[i][j];
-  std::cout << "一時保存した盤面を読み込みました。" << std::endl;
+  std::cout << "### 一時保存した盤面を読み込みました ###" << std::endl;
 }
 
 class GM{
 public:
   int ask_hint();
   int ask_num();
-  char call_function();
   void congratulate();
 };
+
 int GM::ask_hint(){
   char get;
   while(true){
@@ -243,48 +256,37 @@ int GM::ask_hint(){
   }
 }
 int GM::ask_num(){
-  int get, cd;
+  std::string get;
+  int ret;
+
   while(true){
-    std::cout << "    func                  X    Y" << std::endl
-              << "数字[0 or 1~9]または座標[1~9][1~9]を入力: ";
+    std::cout << "                     X    Y" << std::endl
+              << "数字[1~9]または座標[1~9][1~9]を入力: ";
     std::cin >> get;
-    if(get == 0)
-      return FUNCTION;
-    else if(get >= 1 && get <= 9)
-      return get;
-    else if(get >= 11 && get <= 99){
-      cd = (get % 10 - 1) * 9 + get / 10 - 1;
-      if(cd >= 0 && cd <= 80)
-        return cd + IDENTIFY; //識別用に100を足して返す。
-      std::cout << "[!]無効な入力です。" << std::endl;
+
+    if(get[1] == '\0'){
+      ret = get[0] - '0';
+      if(ret == MEMO || ret == SAVE || ret == LOAD)
+        return ret * IDENTIFY;
+      return ret;
     }
-    else{
-      std::cout << "[!]無効な入力です。対処できないでbanします。。。" << std::endl;
-      return INVALID;
-    }
+    ret = (get[0] - '0') - 1 + ((get[1] -'0') - 1) * 9;
+    if(ret >= 0 && ret <= 80)
+      return ret + IDENTIFY; //識別用に100を足して返す。
+    std::cout << "[!]無効な入力です。" << std::endl;
   }
 }
-char GM::call_function(){
-  char get;
-  std::cout << "使いたい機能を選択:" << std::endl
-            << "[s] 盤面を保存" << std::endl
-            << "[l] 最後に保存した盤面を読み込む" << std::endl
-            << "[m] 自動メモを表示/非表示" << std::endl
-            << ": ";
-  std::cin >> get;
-  return get;
-}
 void GM::congratulate(){
-  std::cout << "<< Congratulations!! >>"<< std::endl
-            << "あなたは論理的に数字を埋め尽くしました。"<< std::endl;
+  std::cout << std::endl << "<< Congratulations!! >>"<< std::endl
+            << "あなたはすべての数字を導き出しました。"<< std::endl;
 }
 
 int main(){
   int get, cd = 0;
   bool m; //auto_memoの表示on/off
   GM gm;
-
   Board sudoku(gm.ask_hint());
+
   sudoku.make_memo(cd);
   while(true){
     sudoku.out_board(m);
@@ -305,26 +307,18 @@ int main(){
       sudoku.set_cursor(cd);
       sudoku.make_memo(cd);
       break;
-    case FUNCTION / IDENTIFY: //0が入力された。
-      switch(gm.call_function()){
-      case '0':
-        break;
-      case 's':
-        sudoku.save_board();
-        break;
-      case 'l':
-        sudoku.load_board();
-        break;
-      case 'm':
-        m = !m;
-        break;
-      default: //これより前の入力でint型への文字入力があった。
-        std::cout << "[!]予期せぬ入力を検知。BANします。" << std::endl;
-        return 0;
-      }
+    case MEMO:
+      m = !m;
       break;
-    case INVALID / IDENTIFY:
-      return 0; //不正入力は上のdefault:に行くようだが念の為。
+    case SAVE:
+      sudoku.save_board();
+      break;
+    case LOAD:
+      sudoku.load_board();
+      break;
+    default:
+      std::cout << "[!]無効な入力です。" << std::endl;
+      break;
     }
   }
 
