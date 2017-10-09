@@ -1,3 +1,3 @@
 # practice
 
-練習用リポジトリ
+主にC++とOpenCVの練習用。
